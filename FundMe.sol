@@ -7,7 +7,7 @@ pragma solidity ^0.8.8;
 
 import "./PriceConverter.sol";
 
-
+error NotOwner();
 
 contract FundMe {
     using PriceConverter for uint256;
@@ -37,6 +37,7 @@ contract FundMe {
 
     // anyone can fund but we don't want anyone to be able to withdraw
     
+    // how to know about funders:
     function withdraw() public onlyOwner {
         // for loop: (starting index; ending index (boolean in this example); step amount)
         for(uint256 funderIndex = 0; funderIndex < funders.length; funderIndex = funderIndex++){
@@ -50,12 +51,16 @@ contract FundMe {
         // Using call is currently the recommended way to send or receive blockchain native tokens
         (bool callSuccess, ) = payable(msg.sender).call{value: address(this).balance}("");
         require(callSuccess, "Call failed");
+        revert();
     }
 
     // can use modifiers to improve functionality
     modifier onlyOwner {
-        require(msg.sender == i_owner, "Sender is not owner!");
+      //  require(msg.sender == i_owner, "Sender is not owner!");
+      // v more gas efficient
+      if(msg.sender != i_owner) { revert NotOwner(); }
         _;
     }
+
 
 }
